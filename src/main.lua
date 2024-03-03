@@ -1,4 +1,5 @@
 tetris = {}
+tetris.running = true
 tetris.width, tetris.height = 0
 tetris.x = 10
 tetris.y = 20
@@ -37,17 +38,19 @@ function love.load()
 end
 
 function love.update( dt )  -- delta time
-    sumTime = sumTime + dt
-    if sumTime >= 1 then
-        sumTime = 0
-        if tetris.piece then
-            moved = tetris.movePiece( tetris.movementVectors.down )
-            if not moved then  -- this is grounded
-                tetris.pieceToField()
-                tetris.updateField()
+    if tetris.running then 
+        sumTime = sumTime + dt
+        if sumTime >= 0.5 then
+            sumTime = 0
+            if tetris.piece then
+                moved = tetris.movePiece( tetris.movementVectors.down )
+                if not moved then  -- this is grounded
+                    tetris.pieceToField()
+                    tetris.updateField()
+                end
+            else
+                tetris.newPiece()
             end
-        else
-            tetris.newPiece()
         end
     end
 end
@@ -124,6 +127,9 @@ end
 function tetris.rotatePiece()
     -- rotate 90 degrees clockwise
     -- use x(real), y(img) complex numbers and multiply by -i 
+    if not tetris.piece then
+        return
+    end
     newShape = {}
     for _, segment in ipairs( tetris.piece.shape ) do
         yy = segment[1]*1
@@ -131,7 +137,6 @@ function tetris.rotatePiece()
         -- convert xx, yy to field coords for testing
         fx = tetris.piece.x + xx
         fy = tetris.piece.y + yy
-        print( fx, fy )
         -- test against field limits
         if ( fx > tetris.x or fx < 1 or fy > tetris.y or fy < 1 ) then
             return
@@ -150,7 +155,6 @@ function tetris.pieceToField()
         xx = tetris.piece.x + segment[1]
         yy = tetris.piece.y + segment[2]
         tetris.field[yy][xx] = tetris.piece.color
-        print( xx,yy )
     end
     tetris.piece = nil
 end
@@ -172,10 +176,17 @@ function tetris.newPiece( name, color )
     tetris.piece.color = color
     tetris.piece.x = 5
     tetris.piece.y = 1
+
+    for _, segment in pairs( tetris.piece.shape ) do
+        xx = tetris.piece.x + segment[1]
+        yy = tetris.piece.y + segment[2]
+        if tetris.field[yy][xx] then
+            tetris.gameOver()
+        end
+    end
 end
 
 function tetris.updateField()
-    print( "updateField" )
     for yy = 1, tetris.y do
         lineFull = true
         for xx = 1, tetris.x do
@@ -184,8 +195,12 @@ function tetris.updateField()
             end
         end
         if lineFull then
-            table.remove( tetris.field, yy )
-            table.insert( tetris.field, 1, {} )
+            table.remove( tetris.field, yy )  -- pop line
+            table.insert( tetris.field, 1, {} ) -- add line
         end
     end
+end
+
+function tetris.gameOver()
+    tetris.running = false
 end
