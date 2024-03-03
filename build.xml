@@ -1,0 +1,133 @@
+<project name="Tetris" default="package">
+	<!-- version 7.1 -->
+
+	<tstamp/>
+	<property file="build.properties"/>
+	<property environment="env"/>
+	<property name="env.BUILD_NUMBER" value=""/>
+	<property name="build.number" value=""/>
+	<property name="addon.dir" location="${ADDONLOC}/${ant.project.name}"/>
+	<!--  Pull git repo info -->
+	<!-- Get the last tag reachable from this branch -->
+	<exec executable="git" dir="." outputproperty="git.tag" failifexecutionfails="false" errorproperty="">
+		<arg line="describe --tags --abbrev=0" />
+	</exec>
+	<exec executable="git" dir="." outputproperty="git.firstcommit" failifexecutionfails="false" errorproperty="">
+		<arg line="rev-list --max-parents=0 --abbrev-commit HEAD" />
+	</exec>
+	<!-- Get a 'revision' based on last tag, commit count, commitsha, and branch name -->
+	<exec executable="git" dir="." outputproperty="git.revision" failifexecutionfails="false" errorproperty="">
+		<arg line="describe --tags --always HEAD" />
+	</exec>
+	<condition property="repository.version" value="${git.revision}" else="unknown">
+		<and>
+			<isset property="git.revision"/>
+			<length string="${git.revision}" trim="yes" length="0" when="greater"/>
+		</and>
+	</condition>
+	<!-- find gitbranch -->
+	<exec executable="git" dir="." outputproperty="git.branch" failifexecutionfails="false" errorproperty="">
+		<arg line="rev-parse --abbrev-ref HEAD"/>
+	</exec>
+	<condition property="branch" value="-${git.branch}" else="">
+		<and>
+			<isset property="git.branch"/>
+			<not>
+				<or>
+					<equals arg1="${git.branch}" arg2="master"/>
+					<equals arg1="${git.branch}" arg2="HEAD"/>
+				</or>
+			</not>
+		</and>
+	</condition>
+
+	<property name="version.number" value="${repository.version}${branch}${build.number}"/>
+	<echo>Building: ${version.number}</echo>
+	<!-- end git repo info -->
+
+	<property name="project.zip" value="${ant.project.name}_${version.number}.zip"/>
+	<property name="project.love" value="${ant.project.name}_${version.number}.love"/>
+	<property name="test.dir" location="test"/>
+
+	<property name="target.dir" location="target"/>
+	<property name="working.dir" location="${target.dir}/working"/>
+	<property name="report.dir" location="${target.dir}/reports"/>
+
+	<condition property="test.check">
+		<available file="${test.dir}/test.lua" type="file"/>
+	</condition>
+
+	<filter token="VERSION" value="${version.number}"/>
+	<filter token="INTERFACE" value="${INTERFACE}"/>
+
+	<patternset id="packageFiles">
+		<include name="src/*.lua"/>
+		<include name="target/working/*.txt"/>
+		<include name="README.md"/>
+	</patternset>
+
+	<patternset id="resultFiles">
+		<include name="testOut.xml"/>
+		<include name="coverage.xml"/>
+	</patternset>
+
+	<target name="clean" description="Cleans old builds">
+		<delete dir="target" verbose="true"/>
+	</target>
+
+	<target name="changelog" description="Creates a changelog">
+		<condition property="logstart" value="${git.tag}" else="${git.firstcommit}">
+			<length string="${git.tag}" when="greater" length="0"/>
+		</condition>
+		<mkdir dir="${working.dir}"/>
+		<echo file="${working.dir}/changelog.txt">Changes since ${logstart}..${line.separator}${line.separator}</echo>
+		<exec executable="git" dir=".">
+			<arg line="log --graph --pretty=format:'%h %ci - %d %s &lt;%an&gt;' ${logstart}.."/>
+			<redirector append="true" output="${working.dir}/changelog.txt"/>
+		</exec>
+	</target>
+
+	<target name="package" depends="changelog, test" description="Create a deploy package">
+		<property name="package.dir" location="${working.dir}/${ant.project.name}"/>
+		<delete dir="${package.dir}" verbose="false"/>
+		<copy	todir="${package.dir}" filtering="true" flatten="true">
+			<fileset dir=".">
+				<patternset refid="packageFiles"/>
+			</fileset>
+		</copy>
+		<copy   todir="${package.dir}" filtering="false" flatten="true">
+			<fileset dir="src" includes="*.wav"/>
+		</copy>
+		<zip 	destfile="${target.dir}/${project.love}"
+				basedir="${working.dir}/${ant.project.name}"
+				includes="**"/>
+		<checksum file="${target.dir}/${project.love}"
+				  property="zip.md5" />
+		<echo file="${target.dir}/${project.love}.md5">${zip.md5} ${project.zip}${line.separator}</echo>
+	</target>
+
+	<target name="open" depends="package" description="open the addon dir in the current wow install">
+		<exec executable="open">
+			<arg value="${target.dir}/${project.love}"/>
+		</exec>
+	</target>
+
+	<target name="test" description="run unit tests" if="test.check">
+		<mkdir  dir="${report.dir}"/>
+		<exec executable="lua" dir="test" resultproperty="testResult">
+			<arg value="test.lua"/>
+		</exec>
+		<move todir="${report.dir}">
+			<fileset dir="${test.dir}">
+				<patternset refid="resultFiles"/>
+			</fileset>
+		</move>
+		<fail message="The tests failed. Please see the output for details." status="${testResult}">
+			<condition>
+				<not>
+					<equals arg1="${testResult}" arg2="0"/>
+				</not>
+			</condition>
+		</fail>
+	</target>
+</project>
