@@ -32,9 +32,9 @@ function tetris.loadHighscore()
     hs:open('r')
     data,size = hs:read( 100 )
     hs:close()
-    print( data, size )
+    -- print( data, size )
     tetris.highScore = data and tonumber( data ) or 0
-    print(tetris.highScore)
+    -- print(tetris.highScore)
 end
 
 function love.update( dt )  -- delta time
