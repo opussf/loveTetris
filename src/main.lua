@@ -32,9 +32,7 @@ function tetris.loadHighscore()
     hs:open('r')
     data,size = hs:read( 100 )
     hs:close()
-    -- print( data, size )
     tetris.highScore = data and tonumber( data ) or 0
-    -- print(tetris.highScore)
 end
 
 function love.update( dt )  -- delta time
@@ -103,7 +101,6 @@ function tetris.drawField()
                 love.graphics.setColor( tetris.field[y][x] )
                 xx = tetris.fieldX+((x-1)*tetris.squareSize)
                 yy = tetris.fieldY+((y-1)*tetris.squareSize)
-                -- print( x, y, xx, yy, xx+tetris.squareSize, yy+tetris.squareSize )
                 love.graphics.rectangle( "fill", xx,yy, tetris.squareSize,tetris.squareSize)
             end
         end
@@ -222,7 +219,7 @@ function tetris.updateField()
         end
         if lineFull then
             linesFull = linesFull + 1
-            print( linesFull.." cleared line '"..yy.."' or "..tetris.y-yy )
+            --print( linesFull.." cleared line '"..yy.."' or "..tetris.y-yy )
             table.remove( tetris.field, yy )  -- pop line
             table.insert( tetris.field, 1, {} ) -- add line
         end
@@ -244,13 +241,11 @@ function tetris.drawGameOver()
         love.graphics.rectangle( "fill", (segment[1]*10)+offsetX,(segment[2]*10)+offsetY,
                 10,10 )
     end
-    --love.graphics.print( string.format( "Score: %i  HighScore: %i", #snake, highScore ), 10, 10 )
 end
 
 function love.quit()
     hs = love.filesystem.newFile( tetris.highScoreFile )
     hs:open('w')
-    print( tetris.highScore )
 
     hs:write( tetris.highScore )
 
