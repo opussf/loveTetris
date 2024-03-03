@@ -1,44 +1,44 @@
 tetris = {}
-tetris.running = true
+tetris.isRunning = true
 tetris.width, tetris.height = 0
 tetris.x = 10
 tetris.y = 20
-tetris.squareSize = 20
+tetris.squareSize = 30
 tetris.movementVectors = {
         ["down"]  = {0,1},
         ["left"]  = {-1,0},
         ["right"] = {1,0}
 }
 tetris.field = {}
+tetris.score, tetris.highScore = 0, 0
+tetris.highScoreFile = "highscore"
+tetris.scoreByLinesCleared = { 40, 100, 300, 1200 }  -- https://tetris.wiki/Scoring (Original BPS)
+tetris.gameoverbanner = require "gameoverbanner"
+require "pieces"
 
 local sumTime = 0
-
-require "pieces"
 
 function love.load()
     math.randomseed( os.time() )
     tetris.width, tetris.height = love.graphics.getDimensions()
     tetris.fieldX, tetris.fieldY = tetris.width/2, tetris.height-(tetris.squareSize*(tetris.y+1))
-    -- init field
-    for y = 1,tetris.y do
-        tetris.field[y] = {}
-        for x = 1,tetris.x do
-            tetris.field[y][x] = nil
-        end
-    end
-    -- test data
-    tetris.field[20][1] = { 1, 0, 0, 1 } -- red
-    tetris.field[20][5] = { 0, 1, 0, 1 } -- green
-    tetris.field[20][10] = { 0, 0, 1, 1 } -- blue
-    tetris.field[20][2] = { 1, 1, 0, 1}
-    tetris.field[20][3] = { 1, 1, 0, 1}
-    tetris.field[20][4] = { 1, 1, 0, 1}
-
-    tetris.newPiece( "tee", { 1, 0, 1, 1 } )
+    
+    tetris.loadHighscore()
+    tetris.initField()
+    tetris.newPiece( )
+end
+function tetris.loadHighscore()  
+    hs = love.filesystem.newFile( tetris.highScoreFile )
+    hs:open('r')
+    data,size = hs:read( 100 )
+    hs:close()
+    print( data, size )
+    tetris.highScore = data and tonumber( data ) or 0
+    print(tetris.highScore)
 end
 
 function love.update( dt )  -- delta time
-    if tetris.running then 
+    if tetris.isRunning then 
         sumTime = sumTime + dt
         if sumTime >= 0.5 then
             sumTime = 0
@@ -62,8 +62,12 @@ function love.draw()
                         tetris.fieldX+(tetris.squareSize*tetris.x),tetris.fieldY+(tetris.squareSize*tetris.y),
                         tetris.fieldX+(tetris.squareSize*tetris.x),tetris.fieldY )
     tetris.drawField()
+    tetris.drawScore()
     if tetris.piece then 
         tetris.drawPiece()
+    end
+    if not tetris.isRunning then
+        tetris.drawGameOver()
     end
 end
 
@@ -72,7 +76,23 @@ function love.keypressed( key, scancode, isrepeat )
         tetris.movePiece( tetris.movementVectors[key] )
     end
     if key == "space" then
-        tetris.rotatePiece()
+        if tetris.isRunning then
+            tetris.rotatePiece()
+        else
+            tetris.initField()
+            tetris.piece = nil
+            tetris.isRunning = true
+        end
+    end
+end
+
+function tetris.initField()
+    -- init field
+    for y = 1,tetris.y do
+        tetris.field[y] = {}
+        for x = 1,tetris.x do
+            tetris.field[y][x] = nil
+        end
     end
 end
 
@@ -88,6 +108,11 @@ function tetris.drawField()
             end
         end
     end
+end
+
+function tetris.drawScore()
+    love.graphics.setColor( {1, 1, 1, 1} )
+    love.graphics.print( string.format( "Score: %i   HighScore: %i", tetris.score, tetris.highScore ), 20,20, 0, 2,2 )
 end
 
 function tetris.drawPiece()
@@ -187,6 +212,7 @@ function tetris.newPiece( name, color )
 end
 
 function tetris.updateField()
+    linesFull = 0
     for yy = 1, tetris.y do
         lineFull = true
         for xx = 1, tetris.x do
@@ -195,12 +221,38 @@ function tetris.updateField()
             end
         end
         if lineFull then
+            linesFull = linesFull + 1
+            print( linesFull.." cleared line '"..yy.."' or "..tetris.y-yy )
             table.remove( tetris.field, yy )  -- pop line
             table.insert( tetris.field, 1, {} ) -- add line
         end
     end
+    if linesFull > 0 then
+        tetris.score = tetris.score + tetris.scoreByLinesCleared[ linesFull ]
+        tetris.highScore = math.max( tetris.score, tetris.highScore )
+    end
 end
 
 function tetris.gameOver()
-    tetris.running = false
+    tetris.isRunning = false
+end
+
+function tetris.drawGameOver()
+    love.graphics.setColor( 1, 0, 0, 1 )
+    offsetX, offsetY = (tetris.width/4), (tetris.height/2)-2
+    for _, segment in ipairs( tetris.gameoverbanner ) do
+        love.graphics.rectangle( "fill", (segment[1]*10)+offsetX,(segment[2]*10)+offsetY,
+                10,10 )
+    end
+    --love.graphics.print( string.format( "Score: %i  HighScore: %i", #snake, highScore ), 10, 10 )
+end
+
+function love.quit()
+    hs = love.filesystem.newFile( tetris.highScoreFile )
+    hs:open('w')
+    print( tetris.highScore )
+
+    hs:write( tetris.highScore )
+
+    hs:close()
 end
