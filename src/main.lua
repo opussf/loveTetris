@@ -75,6 +75,7 @@ function love.keypressed( key, scancode, isrepeat )
 			tetris.rotatePiece()
 		else
 			tetris.initField()
+			tetris.score = 0
 			tetris.piece = nil
 			tetris.isRunning = true
 		end
