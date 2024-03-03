@@ -33,7 +33,7 @@ function love.load()
     tetris.field[20][3] = { 1, 1, 0, 1}
     tetris.field[20][4] = { 1, 1, 0, 1}
 
-    tetris.newPiece( "line", { 1, 0, 1, 1 } )
+    tetris.newPiece( "tee", { 1, 0, 1, 1 } )
 end
 
 function love.update( dt )  -- delta time
@@ -126,11 +126,18 @@ function tetris.rotatePiece()
     -- use x(real), y(img) complex numbers and multiply by -i 
     newShape = {}
     for _, segment in ipairs( tetris.piece.shape ) do
-        yy = segment[1]*-1
+        yy = segment[1]*1
         xx = segment[2]*-1
-        print( segment[1], segment[2], "-->", xx, yy )
+        -- convert xx, yy to field coords for testing
+        fx = tetris.piece.x + xx
+        fy = tetris.piece.y + yy
+        print( fx, fy )
+        -- test against field limits
+        if ( fx > tetris.x or fx < 1 or fy > tetris.y or fy < 1 ) then
+            return
+        end
         -- test a collision
-        if tetris.field[yy][xx] then
+        if tetris.field[fy][fx] then
             return
         end
         table.insert( newShape, {xx,yy} )
