@@ -180,7 +180,8 @@ function tetris.newPiece( name, color )
 		name = a[math.random( #a )]
 	end
 	if not color then
-		color = { math.random(), math.random(), math.random(), 1 }
+		z = 0.06
+		color = { math.random()+z, math.random()+z, math.random()+z, 1 }  -- colors over 1 get rounded down to 1
 	end
 
 	tetris.piece = {}
@@ -225,8 +226,7 @@ function tetris.drawGameOver()
 	love.graphics.setColor( 1, 0, 0, 1 )
 	offsetX, offsetY = (tetris.width/4), (tetris.height/2)-2
 	for _, segment in ipairs( tetris.gameoverbanner ) do
-		love.graphics.rectangle( "fill", (segment[1]*10)+offsetX,(segment[2]*10)+offsetY,
-				10,10 )
+		love.graphics.rectangle( "fill", (segment[1]*10)+offsetX,(segment[2]*10)+offsetY, 10,10 )
 	end
 end
 function love.quit()
