@@ -1,32 +1,14 @@
-Line    * * * *
+# loveTetris!
 
-T       * * *
-          *
+Play Tetris!
 
-Square  * *
-        * *
+Install (Love2D)[love2d.org] and play an overly simplified tetris game.
 
-Lightning   *
-            * *
-              *
-
-L       *
-        *
-        * * 
-
+Keys are simple:
 
 Left - move left
 Right - move right
 Down - move down
 Space - rotate clockwise
 
-
-
-{-1,0}, {0,0}, { 1,0}, {0,1}         * * *
-                                       *
-
-                                       *
-{ 0,1}, {0,0}, {0,-1}, {-1,0}        * *                                       
-                                       *
-
-{-1,0}, {0,0}, {1,0}, {0,1}
+Space to restart
