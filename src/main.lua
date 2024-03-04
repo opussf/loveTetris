@@ -33,7 +33,8 @@ function love.load()
 
 	tetris.loadHighscore()
 	tetris.initField()
-	tetris.newPiece( )
+	tetris.newPiece()
+	tetris.font = love.graphics.getFont()
 end
 function tetris.loadHighscore()  
 	hs = love.filesystem.newFile( tetris.highScoreFile )
@@ -115,8 +116,13 @@ function tetris.drawField()
 	end
 end
 function tetris.drawScore()
+	local scoreText = string.format( "Score: %i   HighScore: %i", tetris.score, tetris.highScore )
+	textWidth = tetris.font:getWidth( scoreText )
+	textHeight = tetris.font:getHeight()
+	love.graphics.setColor( {0, 0, 0, 1} )
+	love.graphics.rectangle( "fill", 20, 20, textWidth*2, textHeight*2 )
 	love.graphics.setColor( {1, 1, 1, 1} )
-	love.graphics.print( string.format( "Score: %i   HighScore: %i", tetris.score, tetris.highScore ), 20,20, 0, 2,2 )
+	love.graphics.print( scoreText, 20,20, 0, 2,2 )
 end
 function tetris.drawPiece()
 	love.graphics.setColor( tetris.piece.color )
