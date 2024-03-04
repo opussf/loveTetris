@@ -2,7 +2,7 @@
 
 Play Tetris!
 
-Install [Love2D](love2d.org) and play an overly simplified tetris game.
+Install [Love2D](https://love2d.org) and play an overly simplified tetris game.
 
 Keys are simple:
 
