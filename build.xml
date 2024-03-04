@@ -97,6 +97,7 @@
 		</copy>
 		<copy   todir="${package.dir}" filtering="false" flatten="true">
 			<fileset dir="src" includes="*.wav"/>
+			<fileset dir="src" includes="*.jpg"/>
 		</copy>
 		<zip 	destfile="${target.dir}/${project.love}"
 				basedir="${working.dir}/${ant.project.name}"

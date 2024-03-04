@@ -23,6 +23,14 @@ function love.load()
 	tetris.width, tetris.height = love.graphics.getDimensions()
 	tetris.fieldX, tetris.fieldY = tetris.width/2, tetris.height-(tetris.squareSize*(tetris.y+1))
 
+	tetris.background = love.graphics.newCanvas( tetris.width, tetris.height )
+	love.graphics.setCanvas( tetris.background  )
+        love.graphics.clear( 0, 0, 0, 0 )
+        love.graphics.setBlendMode( "alpha" )
+		tetris.backgroundImg = love.graphics.newImage( "a56614881391ebb96e7a968d70c9c2f0.jpg" )
+		love.graphics.draw( tetris.backgroundImg, 0, 0 )
+    love.graphics.setCanvas()
+
 	tetris.loadHighscore()
 	tetris.initField()
 	tetris.newPiece( )
@@ -52,11 +60,15 @@ function love.update( dt )  -- delta time
 	end
 end
 function love.draw()
-	love.graphics.setColor( 1, 1, 1, 1 )
-	love.graphics.line( tetris.fieldX,tetris.fieldY,
-						tetris.fieldX,tetris.fieldY+(tetris.squareSize*tetris.y),
-						tetris.fieldX+(tetris.squareSize*tetris.x),tetris.fieldY+(tetris.squareSize*tetris.y),
-						tetris.fieldX+(tetris.squareSize*tetris.x),tetris.fieldY )
+	-- love.graphics.setBlendMode( "alpha", "premultiplied" )
+    love.graphics.setColor( 1, 1, 1, 1 )
+    love.graphics.draw( tetris.background, 0,0 )
+	love.graphics.setColor( 0, 0, 0, 1 )
+	love.graphics.rectangle( "fill", tetris.fieldX,tetris.fieldY, tetris.squareSize*tetris.x,tetris.squareSize*tetris.y )
+	-- love.graphics.line( tetris.fieldX,tetris.fieldY,
+	-- 					tetris.fieldX,tetris.fieldY+(tetris.squareSize*tetris.y),
+	-- 					tetris.fieldX+(tetris.squareSize*tetris.x),tetris.fieldY+(tetris.squareSize*tetris.y),
+	-- 					tetris.fieldX+(tetris.squareSize*tetris.x),tetris.fieldY )
 	tetris.drawField()
 	tetris.drawScore()
 	if tetris.piece then
