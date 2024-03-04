@@ -27,7 +27,7 @@ function love.load()
 	love.graphics.setCanvas( tetris.background  )
         love.graphics.clear( 0, 0, 0, 0 )
         love.graphics.setBlendMode( "alpha" )
-		tetris.backgroundImg = love.graphics.newImage( "a56614881391ebb96e7a968d70c9c2f0.jpg" )
+		tetris.backgroundImg = love.graphics.newImage( "IMG_7608.jpg" )
 		love.graphics.draw( tetris.backgroundImg, 0, 0 )
     love.graphics.setCanvas()
 
