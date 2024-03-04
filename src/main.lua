@@ -83,6 +83,12 @@ function love.keypressed( key, scancode, isrepeat )
 	if tetris.movementVectors[key] then
 		tetris.movePiece( tetris.movementVectors[key] )
 	end
+	if key == "up" and tetris.isRunning and tetris.piece then
+		while( tetris.movePiece( tetris.movementVectors.down ) ) do
+		end
+		tetris.pieceToField()
+		tetris.updateField()
+	end
 	if key == "space" then
 		if tetris.isRunning then
 			tetris.rotatePiece()
