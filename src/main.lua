@@ -137,7 +137,7 @@ function tetris.drawScore()
 	highWidth = tetris.font:getWidth( highScoreText )
 	highHeight = tetris.font:getHeight( highScoreText )
 	love.graphics.setColor( {0, 0, 0, 1} )
-	love.graphics.rectangle( "fill", tetris.fieldX+(tetris.squareSize*(tetris.x+1)), tetris.fieldY, highWidth*2,highHeight*24 )
+	love.graphics.rectangle( "fill", tetris.fieldX+(tetris.squareSize*(tetris.x+1)), tetris.fieldY, highWidth*2,highHeight*22 )
 	love.graphics.setColor( {1, 1, 1, 1} )
 	love.graphics.print( highScoreText, tetris.fieldX+(tetris.squareSize*(tetris.x+1)), tetris.fieldY, 0, 2,2 )
 
@@ -260,7 +260,7 @@ function tetris.updateHighScores()
 		table.insert( tetris.highScores, tetris.score )
 		table.sort( tetris.highScores, function(a,b) return a>b end )
 		while( #tetris.highScores > 10 ) do
-			table.remove( tetris.highScores, 1 )
+			table.remove( tetris.highScores, #tetris.highScores )
 		end
 	end
 	for k,v in ipairs( tetris.highScores ) do   -- prune duplicates - seems to happen because of updates
