@@ -256,11 +256,16 @@ function tetris.updateField()
 	end
 end
 function tetris.updateHighScores()
-	if #tetris.highScores < 10 or tetris.score > tetris.highScores[#tetris.highScores] then
+	if ( #tetris.highScores < 10 and tetris.score > 0 ) or tetris.score > tetris.highScores[#tetris.highScores] then
 		table.insert( tetris.highScores, tetris.score )
 		table.sort( tetris.highScores, function(a,b) return a>b end )
 		while( #tetris.highScores > 10 ) do
 			table.remove( tetris.highScores, 1 )
+		end
+	end
+	for k,v in ipairs( tetris.highScores ) do   -- prune duplicates - seems to happen because of updates
+		if k>1 and v == tetris.highScores[k-1] then
+			table.remove( tetris.highScores, k )
 		end
 	end
 end
