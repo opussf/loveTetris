@@ -259,7 +259,7 @@ function tetris.updateHighScores()
 	if ( #tetris.highScores < 10 and tetris.score > 0 ) or tetris.score > tetris.highScores[#tetris.highScores] then
 		table.insert( tetris.highScores, tetris.score )
 		table.sort( tetris.highScores, function(a,b) return a>b end )
-		while( #tetris.highScores > 10 ) do
+		if( #tetris.highScores > 10 ) then
 			table.remove( tetris.highScores, #tetris.highScores )
 		end
 	end
