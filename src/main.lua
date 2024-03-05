@@ -10,7 +10,8 @@ tetris.movementVectors = {
 		["right"] = {1,0}
 }
 tetris.field = {}
-tetris.score, tetris.highScore = 0, 0
+tetris.score = 0
+tetris.highScores = {}
 tetris.highScoreFile = "highscore"
 tetris.scoreByLinesCleared = { 40, 100, 300, 1200 }  -- https://tetris.wiki/Scoring (Original BPS)
 tetris.gameoverbanner = require "gameoverbanner"
@@ -36,12 +37,15 @@ function love.load()
 	tetris.newPiece()
 	tetris.font = love.graphics.getFont()
 end
-function tetris.loadHighscore()  
-	hs = love.filesystem.newFile( tetris.highScoreFile )
-	hs:open('r')
-	data,size = hs:read( 100 )
-	hs:close()
-	tetris.highScore = data and tonumber( data ) or 0
+function tetris.loadHighscore()
+	fileInfo = love.filesystem.getInfo( tetris.highScoreFile )
+	if fileInfo then
+		for line in love.filesystem.lines( tetris.highScoreFile ) do
+			table.insert( tetris.highScores, tonumber(line) )
+		end
+		table.sort( tetris.highScores, function(a,b) return a>b end )
+	end
+	if #tetris.highScores == 0 then tetris.highScores = {0} end
 end
 function love.update( dt )  -- delta time
 	if tetris.isRunning then
@@ -80,7 +84,6 @@ function love.draw()
 	end
 end
 function love.keypressed( key, scancode, isrepeat )
-	print( key, scancode, isrepeat )
 	if tetris.movementVectors[key] then
 		tetris.movePiece( tetris.movementVectors[key] )
 	end
@@ -121,13 +124,23 @@ function tetris.drawField()
 	end
 end
 function tetris.drawScore()
-	local scoreText = string.format( "Score: %i   HighScore: %i", tetris.score, tetris.highScore )
-	textWidth = tetris.font:getWidth( scoreText )
-	textHeight = tetris.font:getHeight()
+	local scoreText = string.format( "Score: %i", tetris.score )
+
+	scoreWidth = tetris.font:getWidth( scoreText )
+	scoreHeight = tetris.font:getHeight()
 	love.graphics.setColor( {0, 0, 0, 1} )
-	love.graphics.rectangle( "fill", 20, 20, textWidth*2, textHeight*2 )
+	love.graphics.rectangle( "fill", tetris.fieldX, tetris.fieldY-(scoreHeight*3), scoreWidth*2,scoreHeight*2 )
 	love.graphics.setColor( {1, 1, 1, 1} )
-	love.graphics.print( scoreText, 20,20, 0, 2,2 )
+	love.graphics.print( scoreText, tetris.fieldX,tetris.fieldY-(scoreHeight*3), 0, 2,2 )
+
+	local highScoreText = "HighScores:\n"..table.concat( tetris.highScores, "\n" )
+	highWidth = tetris.font:getWidth( highScoreText )
+	highHeight = tetris.font:getHeight( highScoreText )
+	love.graphics.setColor( {0, 0, 0, 1} )
+	love.graphics.rectangle( "fill", tetris.fieldX+(tetris.squareSize*(tetris.x+1)), tetris.fieldY, highWidth*2,highHeight*24 )
+	love.graphics.setColor( {1, 1, 1, 1} )
+	love.graphics.print( highScoreText, tetris.fieldX+(tetris.squareSize*(tetris.x+1)), tetris.fieldY, 0, 2,2 )
+
 end
 function tetris.drawPiece()
 	love.graphics.setColor( tetris.piece.color )
@@ -239,11 +252,22 @@ function tetris.updateField()
 	end
 	if linesFull > 0 then
 		tetris.score = tetris.score + tetris.scoreByLinesCleared[ linesFull ]
-		tetris.highScore = math.max( tetris.score, tetris.highScore )
+		-- tetris.highScore = math.max( tetris.score, tetris.highScore )
+	end
+end
+function tetris.updateHighScores()
+	if #tetris.highScores < 10 or tetris.score > tetris.highScores[#tetris.highScores] then
+		table.insert( tetris.highScores, tetris.score )
+		table.sort( tetris.highScores, function(a,b) return a>b end )
+		while( #tetris.highScores > 10 ) do
+			table.remove( tetris.highScores, 1 )
+		end
 	end
 end
 function tetris.gameOver()
 	tetris.isRunning = false
+	tetris.updateHighScores()
+	tetris.drawScore()
 end
 function tetris.drawGameOver()
 	love.graphics.setColor( 1, 0, 0, 1 )
@@ -253,8 +277,11 @@ function tetris.drawGameOver()
 	end
 end
 function love.quit()
+	tetris.updateHighScores()
 	hs = love.filesystem.newFile( tetris.highScoreFile )
 	hs:open('w')
-	hs:write( tetris.highScore )
+	for _,v in ipairs( tetris.highScores ) do
+		hs:write( v.."\n" )
+	end
 	hs:close()
 end
