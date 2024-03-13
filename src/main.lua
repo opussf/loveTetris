@@ -263,6 +263,9 @@ function tetris.updateHighScores()
 			table.remove( tetris.highScores, k )
 		end
 	end
+	if #tetris.highScores > 10 then
+		table.remove( tetris.highScores )
+	end
 end
 function tetris.gameOver()
 	tetris.isRunning = false
