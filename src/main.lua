@@ -26,11 +26,11 @@ function love.load()
 
 	tetris.background = love.graphics.newCanvas( tetris.width, tetris.height )
 	love.graphics.setCanvas( tetris.background  )
-        love.graphics.clear( 0, 0, 0, 0 )
-        love.graphics.setBlendMode( "alpha" )
+		love.graphics.clear( 0, 0, 0, 0 )
+		love.graphics.setBlendMode( "alpha" )
 		tetris.backgroundImg = love.graphics.newImage( "IMG_7608.jpg" )
 		love.graphics.draw( tetris.backgroundImg, 0, 0 )
-    love.graphics.setCanvas()
+	love.graphics.setCanvas()
 
 	tetris.loadHighscore()
 	tetris.initField()
@@ -46,6 +46,9 @@ function tetris.loadHighscore()
 		table.sort( tetris.highScores, function(a,b) return a>b end )
 	end
 	if #tetris.highScores == 0 then tetris.highScores = {0} end
+	while #tetris.highScores > 10 do
+		table.remove( tetris.highScores )
+	end
 end
 function love.update( dt )  -- delta time
 	if tetris.isRunning then
@@ -66,14 +69,10 @@ function love.update( dt )  -- delta time
 end
 function love.draw()
 	-- love.graphics.setBlendMode( "alpha", "premultiplied" )
-    love.graphics.setColor( 1, 1, 1, 1 )
-    love.graphics.draw( tetris.background, 0,0 )
+	love.graphics.setColor( 1, 1, 1, 1 )
+	love.graphics.draw( tetris.background, 0,0 )
 	love.graphics.setColor( 0, 0, 0, 1 )
 	love.graphics.rectangle( "fill", tetris.fieldX,tetris.fieldY, tetris.squareSize*tetris.x,tetris.squareSize*tetris.y )
-	-- love.graphics.line( tetris.fieldX,tetris.fieldY,
-	-- 					tetris.fieldX,tetris.fieldY+(tetris.squareSize*tetris.y),
-	-- 					tetris.fieldX+(tetris.squareSize*tetris.x),tetris.fieldY+(tetris.squareSize*tetris.y),
-	-- 					tetris.fieldX+(tetris.squareSize*tetris.x),tetris.fieldY )
 	tetris.drawField()
 	tetris.drawScore()
 	if tetris.piece then
@@ -140,7 +139,6 @@ function tetris.drawScore()
 	love.graphics.rectangle( "fill", tetris.fieldX+(tetris.squareSize*(tetris.x+1)), tetris.fieldY, highWidth*2,highHeight*22 )
 	love.graphics.setColor( {1, 1, 1, 1} )
 	love.graphics.print( highScoreText, tetris.fieldX+(tetris.squareSize*(tetris.x+1)), tetris.fieldY, 0, 2,2 )
-
 end
 function tetris.drawPiece()
 	love.graphics.setColor( tetris.piece.color )
@@ -259,9 +257,6 @@ function tetris.updateHighScores()
 	if ( #tetris.highScores < 10 and tetris.score > 0 ) or tetris.score > tetris.highScores[#tetris.highScores] then
 		table.insert( tetris.highScores, tetris.score )
 		table.sort( tetris.highScores, function(a,b) return a>b end )
-		if( #tetris.highScores > 10 ) then
-			table.remove( tetris.highScores, #tetris.highScores )
-		end
 	end
 	for k,v in ipairs( tetris.highScores ) do   -- prune duplicates - seems to happen because of updates
 		if k>1 and v == tetris.highScores[k-1] then
@@ -285,8 +280,8 @@ function love.quit()
 	tetris.updateHighScores()
 	hs = love.filesystem.newFile( tetris.highScoreFile )
 	hs:open('w')
-	for _,v in ipairs( tetris.highScores ) do
-		hs:write( v.."\n" )
+	for i = 1, math.min( 10, #tetris.highScores ) do
+		hs:write( tetris.highScores[i].."\n" )
 	end
 	hs:close()
 end
