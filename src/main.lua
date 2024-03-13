@@ -46,6 +46,9 @@ function tetris.loadHighscore()
 		table.sort( tetris.highScores, function(a,b) return a>b end )
 	end
 	if #tetris.highScores == 0 then tetris.highScores = {0} end
+	while #tetris.highScores > 10 do
+		table.remove( tetris.highScores )
+	end
 end
 function love.update( dt )  -- delta time
 	if tetris.isRunning then
@@ -132,6 +135,7 @@ function tetris.drawScore()
 	love.graphics.rectangle( "fill", tetris.fieldX, tetris.fieldY-(scoreHeight*3), scoreWidth*2,scoreHeight*2 )
 	love.graphics.setColor( {1, 1, 1, 1} )
 	love.graphics.print( scoreText, tetris.fieldX,tetris.fieldY-(scoreHeight*3), 0, 2,2 )
+
 
 	local highScoreText = "HighScores:\n"..table.concat( tetris.highScores, "\n" )
 	highWidth = tetris.font:getWidth( highScoreText )
@@ -259,9 +263,9 @@ function tetris.updateHighScores()
 	if ( #tetris.highScores < 10 and tetris.score > 0 ) or tetris.score > tetris.highScores[#tetris.highScores] then
 		table.insert( tetris.highScores, tetris.score )
 		table.sort( tetris.highScores, function(a,b) return a>b end )
-		if( #tetris.highScores > 10 ) then
-			table.remove( tetris.highScores, #tetris.highScores )
-		end
+		-- if( #tetris.highScores > 10 ) then
+		-- 	table.remove( tetris.highScores, #tetris.highScores )
+		-- end
 	end
 	for k,v in ipairs( tetris.highScores ) do   -- prune duplicates - seems to happen because of updates
 		if k>1 and v == tetris.highScores[k-1] then
@@ -285,8 +289,8 @@ function love.quit()
 	tetris.updateHighScores()
 	hs = love.filesystem.newFile( tetris.highScoreFile )
 	hs:open('w')
-	for _,v in ipairs( tetris.highScores ) do
-		hs:write( v.."\n" )
+	for i = 1, math.min( 10, #tetris.highScores ) do
+		hs:write( tetris.highScores[i].."\n" )
 	end
 	hs:close()
 end
