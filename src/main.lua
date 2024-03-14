@@ -118,6 +118,8 @@ function tetris.drawField()
 				xx = tetris.fieldX+((x-1)*tetris.squareSize)
 				yy = tetris.fieldY+((y-1)*tetris.squareSize)
 				love.graphics.rectangle( "fill", xx,yy, tetris.squareSize,tetris.squareSize)
+				love.graphics.setColor( 1, 1, 1, 1 )
+				love.graphics.rectangle( "line", xx,yy, tetris.squareSize,tetris.squareSize)
 			end
 		end
 	end
@@ -141,11 +143,14 @@ function tetris.drawScore()
 	love.graphics.print( highScoreText, tetris.fieldX+(tetris.squareSize*(tetris.x+1)), tetris.fieldY, 0, 2,2 )
 end
 function tetris.drawPiece()
-	love.graphics.setColor( tetris.piece.color )
+	-- love.graphics.setColor( tetris.piece.color )
 	for _, segment in pairs( tetris.piece.shape ) do
 		xx = tetris.fieldX + ((tetris.piece.x+segment[1]-1)*tetris.squareSize)
 		yy = tetris.fieldY + ((tetris.piece.y+segment[2]-1)*tetris.squareSize)
+		love.graphics.setColor( tetris.piece.color )
 		love.graphics.rectangle( "fill", xx, yy, tetris.squareSize, tetris.squareSize )
+		love.graphics.setColor( 1, 1, 1, 1 )
+		love.graphics.rectangle( "line", xx, yy, tetris.squareSize, tetris.squareSize )
 	end
 end
 function tetris.movePiece( vector )
@@ -214,7 +219,7 @@ function tetris.newPiece( name, color )
 		name = a[math.random( #a )]
 	end
 	if not color then
-		z = 0.06
+		z = 0.08
 		color = { math.random()+z, math.random()+z, math.random()+z, 1 }  -- colors over 1 get rounded down to 1
 	end
 
