@@ -51,7 +51,7 @@ function tetris.loadHighscore()
 	end
 end
 function love.update( dt )  -- delta time
-	if tetris.isRunning then
+	if tetris.isRunning and love.window.hasFocus() then
 		sumTime = sumTime + dt
 		if sumTime >= 0.5 then
 			sumTime = 0
