@@ -318,7 +318,7 @@ function love.quit()
 	hs = love.filesystem.newFile( tetris.highScoreFile )
 	hs:open('w')
 	for i = 1, math.min( tetris.maxHighScores, #tetris.highScores ) do
-		hs:write( tetris.highScores[i][1].." "..math.floor( tetris.highScores[i][2] ).."\n" )
+		hs:write( tetris.highScores[i][1].." "..math.floor( tetris.highScores[i][2] or 0 ).."\n" )
 	end
 	hs:close()
 end
