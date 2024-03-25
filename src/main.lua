@@ -11,6 +11,7 @@ tetris.movementVectors = {
 }
 tetris.field = {}
 tetris.score = 0
+tetris.gameTimer = 3540
 tetris.highScores = {}
 tetris.highScoreFile = "highscore"
 tetris.scoreByLinesCleared = { 40, 100, 300, 1200 }  -- https://tetris.wiki/Scoring (Original BPS)
@@ -53,6 +54,7 @@ end
 function love.update( dt )  -- delta time
 	if tetris.isRunning and love.window.hasFocus() then
 		sumTime = sumTime + dt
+		tetris.gameTimer = tetris.gameTimer + dt
 		if sumTime >= 0.5 then
 			sumTime = 0
 			if tetris.piece then
@@ -75,6 +77,7 @@ function love.draw()
 	love.graphics.rectangle( "fill", tetris.fieldX,tetris.fieldY, tetris.squareSize*tetris.x,tetris.squareSize*tetris.y )
 	tetris.drawField()
 	tetris.drawScore()
+	tetris.drawTime()
 	if tetris.piece then
 		tetris.drawPiece()
 	end
@@ -95,6 +98,7 @@ function love.keypressed( key, scancode, isrepeat )
 			tetris.rotatePiece()
 		else
 			tetris.initField()
+			tetris.gameTimer = 0
 			tetris.score = 0
 			tetris.piece = nil
 			tetris.isRunning = true
@@ -141,6 +145,18 @@ function tetris.drawScore()
 	love.graphics.rectangle( "fill", tetris.fieldX+(tetris.squareSize*(tetris.x+1)), tetris.fieldY, highWidth*2,highHeight*22 )
 	love.graphics.setColor( {1, 1, 1, 1} )
 	love.graphics.print( highScoreText, tetris.fieldX+(tetris.squareSize*(tetris.x+1)), tetris.fieldY, 0, 2,2 )
+end
+function tetris.drawTime()
+	local timeText = string.format( "%02i:%02i.%02i", math.floor( tetris.gameTimer / 3600 ), math.floor( tetris.gameTimer / 60 ) % 60, math.floor( tetris.gameTimer % 60 ) )
+
+	timeWidth = tetris.font:getWidth( timeText )
+	timeHeight = tetris.font:getHeight()
+	timeX = tetris.fieldX+(tetris.squareSize*tetris.x)-(timeWidth*2)
+
+	love.graphics.setColor( {0, 0, 0, 1} )
+	love.graphics.rectangle( "fill", timeX,tetris.fieldY-(timeHeight*3), timeWidth*2,timeHeight*2)
+	love.graphics.setColor( {1, 1, 1, 1} )
+	love.graphics.print( timeText, timeX,tetris.fieldY-(timeHeight*3), 0, 2,2 )
 end
 function tetris.drawPiece()
 	-- love.graphics.setColor( tetris.piece.color )
