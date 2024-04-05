@@ -308,7 +308,7 @@ function tetris.gameOver()
 end
 function tetris.drawGameOver()
 	love.graphics.setColor( 1, 0, 0, 1 )
-	offsetX, offsetY = (tetris.width/4), (tetris.height/2)-2
+	offsetX, offsetY = tetris.fieldX, (tetris.height/2)-2
 	for _, segment in ipairs( tetris.gameoverbanner ) do
 		love.graphics.rectangle( "fill", (segment[1]*10)+offsetX,(segment[2]*10)+offsetY, 10,10 )
 	end
