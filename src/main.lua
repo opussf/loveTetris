@@ -308,11 +308,14 @@ function tetris.gameOver()
 end
 function tetris.drawGameOver()
 	-- @TODO: Set the square size as a variable, precalc the offsets
-	love.graphics.setColor( 1, 0, 0, 1 )
-	offsetX = tetris.fieldX + (((tetris.x * tetris.squareSize) - (tetris.gameoverbanner.width*10)) / 2 )
-	offsetY = (tetris.height/2)-2
+	squareSize = 10
+	offsetX = tetris.fieldX - (gameoverbanner.width + 5) * squareSize
+	offsetY = tetris.fieldY
 	for _, segment in ipairs( tetris.gameoverbanner ) do
-		love.graphics.rectangle( "fill", (segment[1]*10)+offsetX,(segment[2]*10)+offsetY, 10,10 )
+		love.graphics.setColor( 1, 0, 0, 1 )
+		love.graphics.rectangle( "fill", (segment[1]*squareSize)+offsetX,(segment[2]*squareSize)+offsetY, squareSize,squareSize )
+		love.graphics.setColor( 0, 0, 0, 1 )
+		love.graphics.rectangle( "line", (segment[1]*squareSize)+offsetX,(segment[2]*squareSize)+offsetY, squareSize,squareSize )
 	end
 end
 function love.quit()
